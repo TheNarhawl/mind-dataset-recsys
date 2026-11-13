@@ -16,7 +16,7 @@ def make_notebook(cells: list[dict]) -> dict:
             },
             "language_info": {
                 "name": "python",
-                "version": "3.12",
+                "version": "3.10",
             },
         },
         "nbformat": 4,
@@ -42,6 +42,29 @@ def code_cell(code: str) -> dict:
     }
 
 
+def make_colab_setup_code(extra_pip: str = "") -> str:
+    pip_packages = (
+        "pydantic pydantic-settings python-dotenv sentence-transformers "
+        f"qdrant-client catboost mlflow 'pandas<3.0.0' {extra_pip}".strip()
+    )
+    return f"""# 1. Setup environment & repository in Google Colab
+import sys
+from pathlib import Path
+
+# Clone repo if running in Google Colab
+if not Path("src/mind_recsys").exists():
+    !git clone https://github.com/TheNarhawl/mind-dataset-recsys.git
+    %cd mind-dataset-recsys
+
+# Add src to sys.path so mind_recsys is immediately available without restarting the kernel
+src_dir = str(Path("src").resolve())
+if src_dir not in sys.path:
+    sys.path.insert(0, src_dir)
+
+# Install required dependencies
+!pip install -q {pip_packages}"""
+
+
 # ==========================================
 # Notebook 1: EDA and Data Preparation
 # ==========================================
@@ -56,13 +79,7 @@ This notebook covers:
 3. Temporal validation splitting (preventing future information leakage).
 4. Generating news text representations and preprocessed dataframes for Stage 1 & Stage 2."""
     ),
-    code_cell(
-        """# Install mind-recsys package
-!pip install -q uv
-!git clone https://github.com/TheNarhawl/mind-dataset-recsys.git
-%cd mind-dataset-recsys
-!pip install -q -e ."""
-    ),
+    code_cell(make_colab_setup_code()),
     code_cell(
         """from pathlib import Path
 import pandas as pd
@@ -146,11 +163,7 @@ This notebook covers:
 3. Building an in-process / HNSW vector index in **Qdrant**.
 4. Benchmarking retrieval performance: **Recall@50**, **Recall@100**, and latency SLA (< 15 ms)."""
     ),
-    code_cell(
-        """# Setup environment
-!pip install -q sentence-transformers qdrant-client pandas numpy tqdm
-!pip install -q -e ."""
-    ),
+    code_cell(make_colab_setup_code()),
     code_cell(
         """from pathlib import Path
 import numpy as np
@@ -188,7 +201,7 @@ print("Articles successfully indexed in Qdrant!")"""
     ),
     code_cell(
         """# Stage 1 Candidate Retrieval Evaluation (Recall@50, Recall@100 & Latency)
-emb_dict = dict(zip(news_ids, embeddings))
+emb_dict = dict(zip(news_ids, embeddings, strict=False))
 
 eval_queries = []
 for _, row in behaviors_df.head(2000).iterrows():
@@ -230,11 +243,7 @@ This notebook covers:
 3. Evaluating ranking quality: **NDCG@5**, **NDCG@10**, **MRR**, **MAP**.
 4. Logging metrics, SHAP feature importance, and model registry in **MLflow**."""
     ),
-    code_cell(
-        """# Setup environment
-!pip install -q catboost mlflow matplotlib scikit-learn
-!pip install -q -e ."""
-    ),
+    code_cell(make_colab_setup_code()),
     code_cell(
         """import pandas as pd
 import numpy as np
@@ -298,7 +307,7 @@ print(fi_df.head(10))"""
     code_cell(
         """# MLflow Tracking & Artifact Logging
 tracker = MLflowTracker(experiment_name="mind-recsys-stage2", tracking_uri="./mlruns")
-metrics = {"NDCG@10": 0.442, "MRR": 0.389, "MAP": 0.412}
+metrics = {"NDCG_at_10": 0.442, "MRR": 0.389, "MAP": 0.412}
 
 run_id = tracker.log_experiment_run(
     run_name="catboost_yetirank_baseline",
@@ -330,11 +339,7 @@ This notebook covers:
 2. Generating and saving interactive HTML Data Drift reports.
 3. Prototyping and profiling the end-to-end **FastAPI** TwoStageRecommender service (p95 SLA < 30 ms)."""
     ),
-    code_cell(
-        """# Setup environment
-!pip install -q evidently fastapi uvicorn requests
-!pip install -q -e ."""
-    ),
+    code_cell(make_colab_setup_code("fastapi uvicorn evidently")),
     code_cell(
         """import numpy as np
 import pandas as pd
@@ -407,4 +412,4 @@ print(f"  p99: {p99:.2f} ms")"""
 with open(NOTEBOOKS_DIR / "04_drift_monitoring_and_export.ipynb", "w", encoding="utf-8") as f:
     json.dump(make_notebook(nb4_cells), f, indent=1)
 
-print("All 4 Jupyter notebooks created successfully!")
+print("All 4 Jupyter notebooks updated successfully with Colab bootstrap code!")

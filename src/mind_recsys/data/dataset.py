@@ -145,4 +145,3 @@ class MINDDataset:
 
     def load_dev_behaviors(self) -> pd.DataFrame:
         return load_behaviors(self.data_dir / "dev" / "behaviors.tsv")
-

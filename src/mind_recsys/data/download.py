@@ -68,4 +68,3 @@ def download_mind_small(
         results["dev"] = dev_dir
 
     return results
-
