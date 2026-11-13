@@ -8,9 +8,21 @@ authors = [
 ]
 requires-python = ">=3.12"
 dependencies = [
+    "catboost>=1.2.10",
+    "evidently>=0.7.23",
+    "fastapi>=0.162.7",
+    "mlflow>=3.18.0",
+    "numpy>=2.5.4",
+    "pandas<3.0.0",
     "pydantic>=2.14.3",
     "pydantic-settings>=2.16.3",
     "python-dotenv>=1.2.4",
+    "qdrant-client>=1.20.0",
+    "requests>=2.34.2",
+    "scipy>=1.18.1",
+    "sentence-transformers>=6.3.0",
+    "tqdm>=4.70.1",
+    "uvicorn>=0.54.0",
 ]
 
 [project.scripts]
