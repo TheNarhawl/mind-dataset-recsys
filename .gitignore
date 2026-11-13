@@ -1,2 +1,35 @@
 plan
 skills
+
+# Environment & Secrets
+.env
+.env.*
+!.env.example
+
+# Python & Virtual Environments
+.venv/
+venv/
+ENV/
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Distribution / Packaging
+dist/
+build/
+*.egg-info/
+
+# Testing & Quality
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# RecSys Data & Artifacts
+data/
+artifacts/
+models/
+qdrant_storage/
+mlruns/
+.superpowers/
